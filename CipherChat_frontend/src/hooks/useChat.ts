@@ -303,12 +303,23 @@ export function useChat() {
         case 'presence': {
           const event = frame as PresenceEvent;
           const online = new Set(event.online.map((entry) => entry.user_id));
+
+          // A presence event tells us who is online, not who exists. If it
+          // mentions an account we have never seen — someone registered after
+          // we logged in — refresh the full list, otherwise they would stay
+          // invisible until a manual reload.
+          const hasUnknownUser = event.online.some(
+            (entry) => !namesRef.current.has(entry.user_id),
+          );
+
           setUsers((prev) =>
             prev.map((user) => ({
               ...user,
               status: online.has(user.user_id) ? 'online' : 'offline',
             })),
           );
+
+          if (hasUnknownUser) void loadUsers();
           break;
         }
 
