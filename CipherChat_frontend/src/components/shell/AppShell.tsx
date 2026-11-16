@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { MessageSquare, Settings, Users } from 'lucide-react';
+import { MessageSquare, Settings, Siren, Users } from 'lucide-react';
 import type { ChatApi } from '../../hooks/useChat';
 import { springSoft } from '../../lib/motion';
 import { cn } from '../../lib/format';
@@ -9,6 +9,9 @@ import { ChatView } from '../chat/ChatView';
 import { InfoPanel } from '../panel/InfoPanel';
 import { SettingsView, type Accent } from '../settings/SettingsView';
 import { Button } from '../ui/Button';
+import { useEmergency } from '../../hooks/useEmergency';
+import { EmergencyCenterView } from '../emergency/EmergencyCenterView';
+import { EmergencyBanner } from '../emergency/EmergencyBanner';
 
 interface AppShellProps {
   chat: ChatApi;
@@ -17,9 +20,20 @@ interface AppShellProps {
 }
 
 export const AppShell: React.FC<AppShellProps> = ({ chat, accent, onAccentChange }) => {
-  const [view, setView] = useState<'chat' | 'settings'>('chat');
+  const [view, setView] = useState<'chat' | 'settings' | 'emergency'>('chat');
   const [panelOpen, setPanelOpen] = useState(true);
   const [drawerOpen, setDrawerOpen] = useState(false);
+
+  const emergency = useEmergency();
+
+  // Everyone we can currently reach becomes a potential recipient.
+  const emergencyContacts = React.useMemo(
+    () =>
+      chat.chats
+        .filter((item) => item.kind === 'dm' && typeof item.peerId === 'number')
+        .map((item) => ({ id: item.peerId as number, name: item.title })),
+    [chat.chats],
+  );
 
   return (
     <div className="flex h-full w-full overflow-hidden bg-background">
@@ -76,6 +90,11 @@ export const AppShell: React.FC<AppShellProps> = ({ chat, accent, onAccentChange
               icon={<Settings className="h-4 w-4" />}
               label="Settings"
             />
+            <SosNavButton
+              active={view === 'emergency'}
+              live={Boolean(emergency.activeEmergency)}
+              onClick={() => setView('emergency')}
+            />
           </div>
         </div>
 
@@ -93,13 +112,36 @@ export const AppShell: React.FC<AppShellProps> = ({ chat, accent, onAccentChange
             icon={<Settings className="h-4 w-4" />}
             label="Settings"
           />
+          <SosNavButton
+            active={view === 'emergency'}
+            live={Boolean(emergency.activeEmergency)}
+            onClick={() => setView('emergency')}
+          />
           <span className="ml-auto font-mono text-[10px] uppercase tracking-[0.1em] text-muted-foreground">
             {chat.chats.length} conversation{chat.chats.length === 1 ? '' : 's'}
           </span>
         </div>
 
+        {/* Persistent incident strip — visible from any view but the center itself */}
+        {emergency.activeEmergency && view !== 'emergency' && (
+          <EmergencyBanner
+            alert={emergency.activeEmergency}
+            onOpen={() => setView('emergency')}
+          />
+        )}
+
         <div className="flex min-h-0 flex-1">
-          {view === 'settings' ? (
+          {view === 'emergency' ? (
+            <EmergencyCenterView
+              contacts={emergencyContacts}
+              emergencies={emergency.history}
+              activeEmergency={emergency.activeEmergency}
+              onTrigger={emergency.trigger}
+              onAcknowledge={emergency.acknowledge}
+              onResolve={emergency.resolve}
+              notify={chat.notify}
+            />
+          ) : view === 'settings' ? (
             <SettingsView
               chat={chat}
               accent={accent}
@@ -124,6 +166,32 @@ export const AppShell: React.FC<AppShellProps> = ({ chat, accent, onAccentChange
     </div>
   );
 };
+
+const SosNavButton: React.FC<{ active: boolean; live: boolean; onClick: () => void }> = ({
+  active,
+  live,
+  onClick,
+}) => (
+  <button
+    onClick={onClick}
+    className={cn(
+      'relative flex items-center gap-2 rounded-lg border-2 px-2.5 py-1.5 text-xs font-bold transition-colors',
+      active
+        ? 'border-danger/60 bg-danger/15 text-danger'
+        : 'border-danger/30 text-danger/80 hover:bg-danger/10 hover:text-danger',
+    )}
+    aria-current={active ? 'page' : undefined}
+  >
+    <Siren className="h-4 w-4" />
+    SOS
+    {live && (
+      <span className="absolute -right-1 -top-1 flex h-2.5 w-2.5">
+        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-danger opacity-75" />
+        <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-danger" />
+      </span>
+    )}
+  </button>
+);
 
 const NavButton: React.FC<{
   active: boolean;
