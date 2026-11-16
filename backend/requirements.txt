@@ -1,0 +1,8 @@
+# CipherChat backend dependencies
+# Install with:  pip install -r requirements.txt
+#
+# bcrypt    - password hashing (falls back to stdlib scrypt if unavailable)
+# websockets - optional wss:// bridge for a browser frontend
+#
+bcrypt>=4.0.0
+websockets>=12.0

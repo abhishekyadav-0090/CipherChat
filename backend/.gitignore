@@ -1,0 +1,18 @@
+# secrets and generated files — never commit these
+certificates/
+*.key
+*.crt
+*.pem
+data/
+logs/
+*.db
+*.db-wal
+*.db-shm
+*.pcap
+
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+.DS_Store
