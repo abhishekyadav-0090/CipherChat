@@ -1,0 +1,268 @@
+@import "tailwindcss";
+
+/*
+ * CipherChat design system — neo-brutalist.
+ *
+ *   2px borders · hard offset shadows · extrabold tight type
+ *   neon green primary (#39FF14, black text) · pastel purple accent (#E9D5FF)
+ *   near-black surfaces, no blur, no gradients-as-decoration
+ *
+ * Everything is a token. Components say `bg-card`, `border-border`,
+ * `text-muted-foreground`; change the value here and the app follows.
+ */
+
+@theme inline {
+  --color-background: var(--bg-base);
+  --color-surface: var(--bg-surface);
+  --color-elevated: var(--bg-elevated);
+  --color-card: var(--bg-card);
+  --color-foreground: var(--fg-base);
+  --color-muted-foreground: var(--fg-muted);
+  --color-border: var(--border-subtle);
+  --color-border-strong: var(--border-highlight);
+  --color-primary: var(--accent);
+  --color-primary-foreground: var(--accent-fg);
+  --color-accent-soft: var(--accent-soft);
+  --color-danger: var(--danger);
+  --color-online: var(--status-online);
+  --font-sans: 'Plus Jakarta Sans', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+}
+
+@layer base {
+  :root {
+    --accent: #39ff14;
+    --accent-hover: #2fe00f;
+    --accent-fg: #08090c;
+    --accent-soft: #e9d5ff;
+    --accent-glow: rgba(57, 255, 20, 0.22);
+
+    --bg-base: #08090c;
+    --bg-surface: #101114;
+    --bg-elevated: #17191e;
+    --bg-card: #1e2127;
+
+    --fg-base: #fafafa;
+    --fg-muted: #9b9ba3;
+
+    --border-subtle: #2b2e36;
+    --border-highlight: #3a3e48;
+
+    --danger: #ff4d4d;
+    --status-online: #39ff14;
+
+    --radius: 12px;
+  }
+
+  /* Accent alternatives offered in Settings */
+  .accent-purple {
+    --accent: #a855f7;
+    --accent-hover: #9333ea;
+    --accent-fg: #ffffff;
+    --accent-glow: rgba(168, 85, 247, 0.25);
+  }
+
+  .accent-cyan {
+    --accent: #22d3ee;
+    --accent-hover: #06b6d4;
+    --accent-fg: #04141a;
+    --accent-glow: rgba(34, 211, 238, 0.22);
+  }
+
+  .accent-amber {
+    --accent: #fbbf24;
+    --accent-hover: #f59e0b;
+    --accent-fg: #1a1204;
+    --accent-glow: rgba(251, 191, 36, 0.22);
+  }
+
+  * {
+    border-color: var(--border-subtle);
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    margin: 0;
+    font-family: var(--font-sans);
+    background: var(--bg-base);
+    color: var(--fg-base);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow: hidden;
+  }
+
+  h1,
+  h2,
+  h3 {
+    letter-spacing: -0.025em;
+    font-weight: 800;
+  }
+
+  /* Selection uses the accent, black text — on-brand and readable */
+  ::selection {
+    background: var(--accent);
+    color: var(--accent-fg);
+  }
+
+  /* Keyboard users get a visible ring; mouse users do not */
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  input,
+  textarea,
+  button {
+    font-family: inherit;
+  }
+}
+
+/* ── scrollbars ─────────────────────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-highlight);
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #4a4f5a;
+  background-clip: content-box;
+}
+
+/* ── primitives ─────────────────────────────────────────────────────────── */
+@layer utilities {
+  .nb-panel {
+    background: var(--bg-surface);
+    border: 2px solid var(--border-subtle);
+    border-radius: var(--radius);
+  }
+
+  .nb-shadow {
+    box-shadow: 4px 4px 0 0 #000;
+  }
+
+  .nb-shadow-sm {
+    box-shadow: 2px 2px 0 0 #000;
+  }
+
+  .nb-shadow-accent {
+    box-shadow: 4px 4px 0 0 var(--accent);
+  }
+
+  /* Pressable: shifts into its own shadow */
+  .nb-press {
+    transition: transform 90ms cubic-bezier(0.2, 0.8, 0.2, 1),
+      box-shadow 90ms cubic-bezier(0.2, 0.8, 0.2, 1),
+      background-color 150ms ease, color 150ms ease, border-color 150ms ease;
+  }
+
+  .nb-press:active {
+    transform: translate(2px, 2px);
+    box-shadow: none;
+  }
+
+  .nb-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    border: 2px solid var(--border-subtle);
+    border-radius: 8px;
+    padding: 1px 7px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  /* Faint engineering grid, the app's only background texture */
+  .nb-grid {
+    background-image:
+      linear-gradient(to right, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+    background-size: 32px 32px;
+  }
+
+  .nb-glow {
+    box-shadow: 0 0 0 1px var(--accent), 0 0 24px var(--accent-glow);
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+/* ── animations ─────────────────────────────────────────────────────────── */
+@keyframes nb-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.45;
+    transform: scale(0.85);
+  }
+}
+
+.animate-nb-pulse {
+  animation: nb-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes nb-bounce-dot {
+  0%,
+  80%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.5;
+  }
+  40% {
+    transform: translateY(-3px);
+    opacity: 1;
+  }
+}
+
+.animate-typing-dot {
+  animation: nb-bounce-dot 1.2s ease-in-out infinite;
+}
+
+@keyframes nb-scan {
+  0% {
+    transform: translateY(-100%);
+  }
+  100% {
+    transform: translateY(400%);
+  }
+}
+
+.animate-nb-scan {
+  animation: nb-scan 2.4s ease-in-out infinite;
+}
+
+/* Respect the OS setting: no motion for people who asked for none. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
